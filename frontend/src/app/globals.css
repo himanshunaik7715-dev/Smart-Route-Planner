@@ -102,6 +102,9 @@ select:focus-visible {
   grid-template-columns: 320px minmax(0, 1fr) 320px;
   gap: 16px;
   margin-top: 16px;
+  /* Do not stretch cards to the tallest sidebar: the map card should hug its
+     own content instead of leaving blank space below the graph. */
+  align-items: start;
 }
 
 .card {
@@ -225,12 +228,13 @@ select {
 }
 
 .map-card {
-  min-height: 520px;
+  display: flex;
+  flex-direction: column;
 }
 
 .map-wrap {
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
   background: linear-gradient(#f7fcfb, #eef7f6);
   border-radius: 8px;
 }
@@ -238,7 +242,7 @@ select {
 .map-svg {
   width: 100%;
   height: auto;
-  min-height: 420px;
+  max-width: 100%;
   display: block;
 }
 

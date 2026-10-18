@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { AlgorithmInfo } from "@/components/AlgorithmInfo";
 import { AppHeader } from "@/components/AppHeader";
 import { ErrorNotice } from "@/components/ErrorNotice";
-import { LoadingState } from "@/components/LoadingState";
 import { MapCanvas } from "@/components/MapCanvas";
 import { RoadControls } from "@/components/RoadControls";
 import { RouteControls } from "@/components/RouteControls";
@@ -32,9 +31,12 @@ export default function HomePage() {
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [traversal, setTraversal] = useState<TraversalResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // The built-in default network is the single authoritative graph on load.
+  // It is intentionally NOT overwritten by an asynchronous GET /api/graph:
+  // that response would replace the default shortly after mount. The graph is
+  // only refreshed by explicit user actions (road/location edits) below.
   const refreshGraph = useCallback(async () => {
     const data = await getGraph();
     // Keep the built-in network if the API returns an empty or malformed payload.
@@ -42,28 +44,6 @@ export default function HomePage() {
       setGraph(data);
     }
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        await refreshGraph();
-      } catch {
-        if (!cancelled) {
-          setError(
-            "Live API unavailable — showing the built-in demo network. Start the Java backend on port 8080 to enable routing and edits.",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [refreshGraph]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -80,7 +60,6 @@ export default function HomePage() {
   return (
     <div className="app-shell">
       <AppHeader />
-      {loading ? <LoadingState label="Loading schematic network…" /> : null}
       {error ? <ErrorNotice message={error} /> : null}
 
       <div className="layout">
@@ -89,7 +68,7 @@ export default function HomePage() {
             locations={graph?.locations ?? []}
             sourceId={sourceId}
             destinationId={destinationId}
-            busy={busy || loading}
+            busy={busy}
             onSource={(id) => {
               setSourceId(id);
               setRoute(null);
