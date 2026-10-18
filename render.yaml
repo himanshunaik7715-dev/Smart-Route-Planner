@@ -1,0 +1,19 @@
+# Render Blueprint (infrastructure as code) for the free-tier backend.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Usage: push this repository to GitHub/GitLab, then in Render choose
+# "New > Blueprint" and point it at the repository. Render reads this file.
+# Free plan caveats are documented in DEPLOYMENT.md.
+services:
+  - type: web
+    name: srps-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      # Set this in the Render dashboard to the deployed frontend origin,
+      # for example https://srps-frontend.vercel.app
+      - key: SRPS_CORS_ALLOWED_ORIGIN
+        sync: false

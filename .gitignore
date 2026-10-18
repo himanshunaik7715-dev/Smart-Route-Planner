@@ -1,0 +1,16 @@
+**/node_modules/
+**/.next/
+**/out/
+**/target/
+**/.idea/
+**/*.iml
+**/.env
+**/.env.local
+**/.env.production
+**/.env.*.local
+**/*.log
+**/*.tsbuildinfo
+**/.DS_Store
+**/Thumbs.db
+backend/.tools/
+*.md

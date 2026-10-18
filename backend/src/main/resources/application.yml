@@ -1,0 +1,14 @@
+server:
+  # Hosting platforms (for example Render) inject PORT; defaults to 8080 locally.
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: smart-routing-planning-system
+
+srps:
+  cors:
+    # Comma-separated list of exact allowed browser origins.
+    # Locally this is the Next.js dev server; in production set SRPS_CORS_ALLOWED_ORIGIN
+    # to the deployed frontend origin, for example https://your-app.vercel.app
+    allowed-origin: ${SRPS_CORS_ALLOWED_ORIGIN:http://localhost:3000}
