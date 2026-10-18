@@ -22,10 +22,11 @@ import {
   removeRoad,
   setRoadStatus,
 } from "@/lib/api";
+import { DEFAULT_GRAPH } from "@/lib/defaultGraph";
 import type { GraphData, RouteResult, TraversalResult } from "@/lib/types";
 
 export default function HomePage() {
-  const [graph, setGraph] = useState<GraphData | null>(null);
+  const [graph, setGraph] = useState<GraphData>(DEFAULT_GRAPH);
   const [sourceId, setSourceId] = useState("college");
   const [destinationId, setDestinationId] = useState("airport");
   const [route, setRoute] = useState<RouteResult | null>(null);
@@ -36,7 +37,10 @@ export default function HomePage() {
 
   const refreshGraph = useCallback(async () => {
     const data = await getGraph();
-    setGraph(data);
+    // Keep the built-in network if the API returns an empty or malformed payload.
+    if (data && Array.isArray(data.locations) && Array.isArray(data.roads)) {
+      setGraph(data);
+    }
   }, []);
 
   useEffect(() => {
@@ -44,9 +48,11 @@ export default function HomePage() {
     (async () => {
       try {
         await refreshGraph();
-      } catch (err) {
+      } catch {
         if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : "Failed to load the demo network.");
+          setError(
+            "Live API unavailable — showing the built-in demo network. Start the Java backend on port 8080 to enable routing and edits.",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -76,9 +82,6 @@ export default function HomePage() {
       <AppHeader />
       {loading ? <LoadingState label="Loading schematic network…" /> : null}
       {error ? <ErrorNotice message={error} /> : null}
-      {!graph && !loading ? (
-        <div className="status status-warn">The graph is empty or the API is unavailable.</div>
-      ) : null}
 
       <div className="layout">
         <div>
