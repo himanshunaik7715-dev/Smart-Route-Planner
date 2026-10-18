@@ -64,6 +64,46 @@ public class GraphService {
         graph.removeRoad(roadId);
     }
 
+    /**
+     * Clears the graph and re-applies the canonical 10-location / 16-road demo
+     * network. The graph is a mutable in-memory singleton, so it drifts as roads
+     * are added, removed or closed. The frontend always renders this same default
+     * network on load, so it calls this to keep both sides in sync.
+     */
+    public synchronized void resetToDefault() {
+        graph.clear();
+        generatedLocationSuffix.set(1);
+        generatedRoadSuffix.set(1);
+
+        seedLocation("college", "College", "campus", 120, 420);
+        seedLocation("station", "Station", "transit", 280, 280);
+        seedLocation("mall", "Mall", "commercial", 480, 180);
+        seedLocation("hospital", "Hospital", "medical", 500, 420);
+        seedLocation("bus_stop", "Bus Stop", "transit", 280, 540);
+        seedLocation("park", "Park", "park", 700, 300);
+        seedLocation("hotel", "Hotel", "lodging", 680, 520);
+        seedLocation("airport", "Airport", "airport", 900, 200);
+        seedLocation("library", "Library", "library", 140, 180);
+        seedLocation("restaurant", "Restaurant", "dining", 860, 480);
+
+        seedRoad("r1", "college", "station", 3.0);
+        seedRoad("r2", "college", "bus_stop", 2.5);
+        seedRoad("r3", "college", "library", 2.0);
+        seedRoad("r4", "station", "mall", 4.0);
+        seedRoad("r5", "station", "hospital", 4.0);
+        seedRoad("r6", "bus_stop", "hospital", 3.5);
+        seedRoad("r7", "mall", "park", 6.0);
+        seedRoad("r8", "hospital", "park", 3.0);
+        seedRoad("r9", "hospital", "hotel", 4.5);
+        seedRoad("r10", "park", "airport", 5.0);
+        seedRoad("r11", "hotel", "airport", 8.0);
+        seedRoad("r12", "hotel", "restaurant", 2.0);
+        seedRoad("r13", "library", "mall", 5.5);
+        seedRoad("r14", "college", "airport", 40.0);
+        seedRoad("r15", "mall", "airport", 18.0);
+        seedRoad("r16", "bus_stop", "hotel", 9.0);
+    }
+
     public synchronized void seedLocation(String id, String name, String type, double x, double y) {
         graph.addLocation(new Location(id, name, type, x, y));
     }

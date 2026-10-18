@@ -52,6 +52,14 @@ export function getGraph() {
   return request<GraphData>("/api/graph");
 }
 
+/**
+ * Re-seeds the backend's mutable in-memory graph with the canonical default
+ * network so it matches the built-in graph the frontend renders on load.
+ */
+export function resetGraph() {
+  return request<GraphData>("/api/graph/reset", { method: "POST" });
+}
+
 export function getShortest(sourceId: string, destinationId: string) {
   return request<RouteResult>(
     `/api/routes/shortest?sourceId=${encodeURIComponent(sourceId)}&destinationId=${encodeURIComponent(destinationId)}`,

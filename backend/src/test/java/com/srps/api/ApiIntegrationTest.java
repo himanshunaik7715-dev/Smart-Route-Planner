@@ -125,6 +125,36 @@ class ApiIntegrationTest {
         mockMvc.perform(delete("/api/roads/r-temp")).andExpect(status().isNotFound());
     }
 
+    @Test
+    void resetRestoresCanonicalGraphAndRoutesStillWork() throws Exception {
+        // Establish a known baseline regardless of other tests.
+        JsonNode baseline = json(mockMvc.perform(post("/api/graph/reset")).andExpect(status().isOk()).andReturn());
+        assertEquals(10, baseline.get("locations").size());
+        assertEquals(16, baseline.get("roads").size());
+
+        // Mutate the shared in-memory graph: remove a road and add a location.
+        mockMvc.perform(delete("/api/roads/r1")).andExpect(status().isNoContent());
+        String extraId = "reset-extra-" + System.nanoTime();
+        mockMvc.perform(post("/api/locations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Extra\",\"type\":\"other\",\"x\":10,\"y\":10,\"id\":\"" + extraId + "\"}"))
+                .andExpect(status().isCreated());
+
+        JsonNode mutated = json(mockMvc.perform(get("/api/graph")).andExpect(status().isOk()).andReturn());
+        assertEquals(11, mutated.get("locations").size());
+        assertEquals(15, mutated.get("roads").size());
+
+        // Reset restores the canonical network, so Remove/route inputs match again.
+        JsonNode reset = json(mockMvc.perform(post("/api/graph/reset")).andExpect(status().isOk()).andReturn());
+        assertEquals(10, reset.get("locations").size());
+        assertEquals(16, reset.get("roads").size());
+
+        // Shortest distance works on the restored graph.
+        JsonNode shortest = json(getRoute("/api/routes/shortest?sourceId=college&destinationId=airport"));
+        assertTrue(shortest.get("reachable").asBoolean());
+        assertEquals(14.0, shortest.get("totalDistanceKm").asDouble());
+    }
+
     private MvcResult getRoute(String url) throws Exception {
         return mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
     }

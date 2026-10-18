@@ -39,6 +39,17 @@ public final class Graph {
         return roadCount;
     }
 
+    /** Empties the graph so it can be re-seeded with the canonical network. */
+    public void clear() {
+        locations = new Location[INITIAL_CAPACITY];
+        adjacencyHeads = new EdgeNode[INITIAL_CAPACITY];
+        roads = new Road[INITIAL_CAPACITY];
+        locationIndexById.clear();
+        roadIndexById.clear();
+        vertexCount = 0;
+        roadCount = 0;
+    }
+
     public Location getLocation(int index) {
         ensureVertexIndex(index);
         return locations[index];

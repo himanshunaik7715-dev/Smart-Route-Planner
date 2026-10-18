@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AlgorithmInfo } from "@/components/AlgorithmInfo";
 import { AppHeader } from "@/components/AppHeader";
 import { ErrorNotice } from "@/components/ErrorNotice";
@@ -19,6 +19,7 @@ import {
   getMinHops,
   getShortest,
   removeRoad,
+  resetGraph,
   setRoadStatus,
 } from "@/lib/api";
 import { DEFAULT_GRAPH } from "@/lib/defaultGraph";
@@ -43,6 +44,15 @@ export default function HomePage() {
     if (data && Array.isArray(data.locations) && Array.isArray(data.roads)) {
       setGraph(data);
     }
+  }, []);
+
+  // Bring the backend's mutable in-memory graph back to the canonical default so
+  // Remove and route calculations operate on the same graph the map displays.
+  // This writes to the backend; it never replaces the rendered DEFAULT_GRAPH.
+  useEffect(() => {
+    resetGraph().catch(() => {
+      // Backend unavailable: keep working from the built-in default network.
+    });
   }, []);
 
   async function run(action: () => Promise<void>) {
